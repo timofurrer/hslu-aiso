@@ -1,4 +1,8 @@
 numpy
+pandas
 matplotlib
+sklearn
+networkx
+tqdm
 jupyter
-ortools==7.2.6977
+ortools<7
