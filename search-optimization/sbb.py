@@ -40,6 +40,8 @@ class SBB:
                 self.trainLines[trainLineId] = TrainLine(trainLineId, trainLineName)
             hub = Hub()
             hub.name = treatString(j['fields']['bezeichnung_bpk'])
+            # hub.x = j['fields']['geopos'][1] * 100
+            # hub.y = j['fields']['geopos'][0] * 100
             hub.x = j['fields']['geopos'][1]
             hub.y = j['fields']['geopos'][0]
             km = j['fields']['km']
@@ -75,7 +77,7 @@ class SBB:
         for h in self.hubs:
             locations[h] = self.hubs[h].getCoord()
         return locations
-    
+
     def get_distance_between(self, h1, h2):
         return  math.sqrt((self.hubs[h1].x-self.hubs[h2].x)**2 + (self.hubs[h1].y-self.hubs[h2].y)**2)
 

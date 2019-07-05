@@ -1,5 +1,10 @@
-class Graph:
+"""
+This module contains a Graph and Graph Problem implementation
+which can be used with different search algorithms.
+"""
 
+
+class Graph:
     """A graph connects nodes (vertices) by edges (links).  Each edge can also
     have a length associated with it.  The constructor call is something like:
         g = Graph({'A': {'B': 1, 'C': 2})
@@ -54,13 +59,13 @@ class Graph:
         return list(nodes)
 
 
-def UndirectedGraph(graph_dict=None):
+class UndirectedGraph(Graph):
     """Build a Graph where every edge (including future ones) goes both ways."""
-    return Graph(graph_dict = graph_dict, directed=False)
+    def __init__(self, graph_dict=None):
+        super().__init__(graph_dict=graph_dict, directed=False)
 
 
-class GraphProblem():
-
+class GraphProblem:
     """The problem of searching a graph from one node to another."""
 
     def __init__(self, initial, goal, graph):
@@ -74,9 +79,10 @@ class GraphProblem():
         list, as specified in the constructor. Override this method if
         checking against a single self.goal is not enough."""
         if isinstance(self.goal, list):
-            return is_in(state, self.goal)
+            return state in self.goal
         else:
             return state == self.goal
+
     def actions(self, A):
         """The actions at a graph node are just its neighbors."""
         return list(self.graph.get(A).keys())
@@ -86,52 +92,9 @@ class GraphProblem():
         return action
 
     def path_cost(self, cost_so_far, A, action, B):
-        return cost_so_far + (self.graph.get(A, B) or infinity)
+        return cost_so_far + (self.graph.get(A, B) or float("INF"))
 
-#class Node:
-#
-#    """A node in a search tree. Contains a pointer to the parent (the node
-#    that this is a successor of) and to the actual state for this node. Note
-#    that if a state is arrived at by two paths, then there are two nodes with
-#    the same state.  Also includes the action that got us to this state, and
-#    the total path_cost (also known as g) to reach the node.  Other functions
-#    may add an f and h value; see best_first_graph_search and astar_search for
-#    an explanation of how the f and h values are handled. You will not need to
-#    subclass this class."""
-#
-#    def __init__(self, state, parent=None, action=None, path_cost=0):
-#        """Create a search tree Node, derived from a parent by an action."""
-#        self.state = state
-#        self.parent = parent
-#        self.action = action
-#        self.path_cost = self.path_cost
-#        self.depth = parent.depth + 1 if parent else 0
-#        
-#    def exapand(self, problem):
-#        """List the nodes reachable in one step from this node."""
-#        return problem.graph.get(self)
-#    
-#    def child_node(self, problem, action):
-#        """Return the child node reached by a given action"""
-#        neighbors = problem.actions(self)
-#        return next(n for n in neighbors if n.action == action)
-#        
-#    def solution(self):
-#        """Return the sequence of actions to go from the root to this node."""
-#        #return [n.action for n in self.path()]
-#        if self.parent is None:
-#            return [self.action]
-#        
-#        return self.parent.solution() + [self.action]
-#    
-#    def path(self):
-#        """Return a list of nodes forming the path from the root to this node."""
-#        if self.parent is None:
-#            return [self]
-#        
-#        return self.parent.path() + [self]
-    
-    
+
 class Node:
     """A node in a search tree. Contains a pointer to the parent (the node
     that this is a successor of) and to the actual state for this node. Note
@@ -141,7 +104,6 @@ class Node:
     may add an f and h value; see best_first_graph_search and astar_search for
     an explanation of how the f and h values are handled. You will not need to
     subclass this class."""
-
     def __init__(self, state, parent=None, action=None, path_cost=0):
         """Create a search tree Node, derived from a parent by an action."""
         self.state = state
@@ -152,7 +114,6 @@ class Node:
         if parent:
             self.depth = parent.depth + 1
 
-
     def expand(self, problem):
         """List the nodes reachable in one step from this node."""
         return [self.child_node(problem, action)
@@ -160,11 +121,13 @@ class Node:
 
     def child_node(self, problem, action):
         next_state = problem.result(self.state, action)
-        next_node = Node(next_state, self, action,
-                    problem.path_cost(self.path_cost, self.state,
-                                      action, next_state))
+        next_node = Node(
+            next_state, self, action,
+            problem.path_cost(
+                self.path_cost, self.state,
+                action, next_state))
         return next_node
-    
+
     def solution(self):
         """Return the sequence of actions to go from the root to this node."""
         return [node.action for node in self.path()[1:]]
@@ -176,9 +139,30 @@ class Node:
             path_back.append(node)
             node = node.parent
         return list(reversed(path_back))
-    
+
+    def __gt__(self, other):
+        return self.path_cost > other.path_cost
+
+    def __ge__(self, other):
+        return self.path_cost >= other.path_cost
+
+    def __lt__(self, other):
+        return self.path_cost < other.path_cost
+
+    def __le__(self, other):
+        return self.path_cost <= other.path_cost
+
+    def __hash__(self):
+        return hash((
+            self.state,
+            self.parent,
+            self.action,
+            self.path_cost,
+            self.depth
+        ))
+
     def __eq__(self, other):
         if not isinstance(other, Node):
             False
-            
+
         return self.state == other.state

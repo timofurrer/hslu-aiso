@@ -1,0 +1,4 @@
+numpy
+matplotlib
+jupyter
+ortools==7.2.6977
